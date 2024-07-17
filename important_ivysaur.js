@@ -244,17 +244,12 @@ function makeCircle(pixel, offset) {
 }
 
 function makeInsideCircle(pixel, offset) {
-  drawY()
+  drawY(28, [], pixel, offset)
 }
 
-let blackCircle = makeCircle(blackPixel)
-let yellowCircle = makeCircle(yellowPixel, [5, -27])
-yellowCircle.direction = "down"
-console.log(yellowCircle.direction)
 
-let fallingCircles = [
-  yellowCircle
-]
+
+
 
 function fallDown(table) {
   let count = 1
@@ -288,6 +283,13 @@ function moveDown(table, magnitude){
   }
 }
 
+let blackCircle = makeCircle(blackPixel)
+// let yellowCircle = makeCircle(yellowPixel, [0, -27])
+let directions = ["up", "down", "left", "right"]
+
+let fallingCircles = [
+]
+
 onInput("d", function(){
   moveRight(blackCircle, 1)
 })
@@ -301,11 +303,23 @@ onInput("s", function(){
 })
 
 function moveDirection(table) {
-  if table.direction =
+  if (table.direction == "down") {
+    moveDown(table)
+  }
+}
+
+function createNew() {
+  while (true) {
+    setTimeout(function(){fallingCircles.push(makeCircle(yellowPixel, [0, -27]))}, 2000)
+    
+  }
 }
 
 setInterval(function(){
+  
   for (let i = 0; i < fallingCircles.length; i++) {
     moveDown(fallingCircles[i], 1)
   }
-}, 1000 / 60)
+}, 1000 / 15)
+
+createNew()
