@@ -130,10 +130,45 @@ const level = map`
 p............................................................`
 setMap(level)
 
+function drawLineAlongY(x, y1, y2, pixel) {
+  let yLength = y2 - y1 + 1
+
+  for (i = 0; i < yLength; i++) {
+    addSprite(x, y1+i, pixel)
+  }
+}
+
+function drawLineAlongX(y, x1, x2, pixel) {
+  let xLength = x2 - x1 + 1
+
+  for (i = 0; i < xLength; i++) {
+    addSprite(x1+i, y, pixel)
+  }
+}
+
+function getLineofTilesAlongX(y, x1, x2) {
+  let xLength = x2 - x1 + 1
+  let lines = []
+  for (i = 0; i < xLength; i++) {
+    lines.push(getTile(x1+i, y)[0])
+  }
+  return lines
+}
+
+function getLineofTilesAlongY(x, y1, y2) {
+  let yLength = y2 - y1 + 1
+  let lines = []
+  for (i = 0; i < yLength; i++) {
+    lines.push(getTile(x, y1+i)[0])
+  }
+  return lines
+}
+  
 function makeCircle(offsetX, offsetY, pixel) {
-  addSprite(33+offsetX, 29+offsetY, pixel)
-  addSprite(33+offsetX, 30+offsetY, pixel)
-  addSprite(33+offsetX, 31+offsetY, pixel)
+  // addSprite(33+offsetX, 29+offsetY, pixel)
+  // addSprite(33+offsetX, 30+offsetY, pixel)
+  // addSprite(33+offsetX, 31+offsetY, pixel)
+  drawLineAlongY(33, 29, 31, pixel)
   addSprite(32+offsetX, 32+offsetY, pixel)
   addSprite(31+offsetX, 33+offsetY, pixel)
   addSprite(30+offsetX, 33+offsetY, pixel)
@@ -148,10 +183,7 @@ function makeCircle(offsetX, offsetY, pixel) {
   addSprite(31+offsetX, 27+offsetY, pixel)
   addSprite(32+offsetX, 28+offsetY, pixel)
 
-  return yCircle = [
-    getTile(33+offsetX, 29+offsetY)[0],
-    getTile(33+offsetX, 30+offsetY)[0],
-    getTile(33+offsetX, 31+offsetY)[0],
+  let table1 = [
     getTile(32+offsetX, 32+offsetY)[0],
     getTile(31+offsetX, 33+offsetY)[0],
     getTile(30+offsetX, 33+offsetY)[0],
@@ -165,12 +197,36 @@ function makeCircle(offsetX, offsetY, pixel) {
     getTile(30+offsetX, 27+offsetY)[0],
     getTile(31+offsetX, 27+offsetY)[0],
     getTile(32+offsetX, 28+offsetY)[0],
-    
   ]
+
+  let table2 = getLineofTilesAlongY(33, 29, 31)
+  table1.concat(table2)
+
+  return table1
+
+  /*
+  return yCircle = [
+    // getTile(33+offsetX, 29+offsetY)[0],
+    // getTile(33+offsetX, 30+offsetY)[0],
+    // getTile(33+offsetX, 31+offsetY)[0],
+    getTile(32+offsetX, 32+offsetY)[0],
+    getTile(31+offsetX, 33+offsetY)[0],
+    getTile(30+offsetX, 33+offsetY)[0],
+    getTile(29+offsetX, 33+offsetY)[0],
+    getTile(28+offsetX, 32+offsetY)[0],
+    getTile(27+offsetX, 31+offsetY)[0],
+    getTile(27+offsetX, 30+offsetY)[0],
+    getTile(27+offsetX, 29+offsetY)[0],
+    getTile(28+offsetX, 28+offsetY)[0],
+    getTile(29+offsetX, 27+offsetY)[0],
+    getTile(30+offsetX, 27+offsetY)[0],
+    getTile(31+offsetX, 27+offsetY)[0],
+    getTile(32+offsetX, 28+offsetY)[0],
+  ]*/
 }
 
 let blackCircle = makeCircle(0, 0, blackPixel)
-let yellowCircle = makeCircle(0, -27, yellowPixel)
+// let yellowCircle = makeCircle(0, -27, yellowPixel)
 
 function moveRight(table, magnitude){
   for (let i = 0; i < table.length; i++){
