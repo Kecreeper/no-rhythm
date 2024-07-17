@@ -168,22 +168,38 @@ function addSprite2(x, y, pixel, offset){
   addSprite(x + offset[0], y + offset[1], pixel)
 }
 
-function getTilesX(y, x1, x2) {
-  let xLength = x2 - x1 + 1
-  let lines = []
-  for (i = 0; i < xLength; i++) {
-    lines.push(getTile(x1+i, y)[0])
+function getTilesX(xTable, y, offset) {
+  if (offset == null){
+    offset = [0, 0]
   }
-  return lines
+
+  let x1 = xTable[0] + offset[0]
+  let x2 = xTable[1] + offset[0]
+  y = y + offset[1]
+  let xLength = x2 - x1 + 1
+
+  let tiles = []
+  for (let i = 0; i < xLength; i++) {
+    tiles.push(getTile(x1+i, y)[0])
+  }
+  return tiles
 }
 
-function getTilesY(x, y1, y2) {
-  let yLength = y2 - y1 + 1
-  let lines = []
-  for (i = 0; i < yLength; i++) {
-    lines.push(getTile(x, y1+i)[0])
+function getTilesY(x, yTable, offset) {
+  if (offset == null){
+    offset = [0, 0]
   }
-  return lines
+  
+  let y1 = yTable[0] + offset[1]
+  let y2 = yTable[1] + offset[1]
+  x = x + offset[0]
+  let yLength = y2 - y1 + 1
+  
+  let tiles = []
+  for (let i = 0; i < yLength; i++) {
+    tiles.push(getTile(x, y1+i)[0])
+  }
+  return tiles
 }
 
 function getTile2(x, y, offset) {
@@ -218,41 +234,38 @@ function makeCircle(pixel, offset) {
     getTile2(32, 28, offset)[0],
     getTile2(28, 32, offset)[0],
   ]
+  let table2 = getTilesX([29, 31], 27, offset)
+  let table3 = getTilesX([29, 31], 33, offset)
+  let table4 = getTilesY(27, [29, 31], offset)
+  let table5 = getTilesY(33, [29, 31], offset)
   
-  let table2 = getLineOfTilesAlongY(33, 29, 31)
-  let finalTable = table1.concat(table2)
-  return table1
-  
+  let finalTable = table1.concat(table2, table3, table4, table5)
+  return finalTable
+}
 
-  /*
-  return yCircle = [
-    // getTile(33+offsetX, 29+offsetY)[0],
-    // getTile(33+offsetX, 30+offsetY)[0],
-    // getTile(33+offsetX, 31+offsetY)[0],
-    getTile(32+offsetX, 32+offsetY)[0],
-    getTile(31+offsetX, 33+offsetY)[0],
-    getTile(30+offsetX, 33+offsetY)[0],
-    getTile(29+offsetX, 33+offsetY)[0],
-    getTile(28+offsetX, 32+offsetY)[0],
-    getTile(27+offsetX, 31+offsetY)[0],
-    getTile(27+offsetX, 30+offsetY)[0],
-    getTile(27+offsetX, 29+offsetY)[0],
-    getTile(28+offsetX, 28+offsetY)[0],
-    getTile(29+offsetX, 27+offsetY)[0],
-    getTile(30+offsetX, 27+offsetY)[0],
-    getTile(31+offsetX, 27+offsetY)[0],
-    getTile(32+offsetX, 28+offsetY)[0],
-  ]*/
+function makeInsideCircle(pixel, offset) {
+  drawY()
 }
 
 let blackCircle = makeCircle(blackPixel)
-// let yellowCircle = makeCircle(0, -27, yellowPixel)
+let yellowCircle = makeCircle(yellowPixel, [5, -27])
+yellowCircle.direction = "down"
+console.log(yellowCircle.direction)
+
+let fallingCircles = [
+  yellowCircle
+]
+
+function fallDown(table) {
+  let count = 1
+
+  for (let i = 0; i < count; i++){
+    moveDown(table, 1)
+  }
+}
 
 function moveRight(table, magnitude){
   for (let i = 0; i < table.length; i++){
-
-    
-    
     table[i].x += magnitude
   }
 }
@@ -263,6 +276,17 @@ function moveLeft(table, magnitude){
   }
 }
 
+function moveUp(table, magnitude){
+  for (let i = 0; i < table.length; i++){
+    table[i].y -= magnitude
+  }
+}
+
+function moveDown(table, magnitude){
+  for (let i = 0; i < table.length; i++){
+    table[i].y += magnitude
+  }
+}
 
 onInput("d", function(){
   moveRight(blackCircle, 1)
@@ -271,3 +295,17 @@ onInput("d", function(){
 onInput("a", function(){
   moveLeft(blackCircle, 1)
 })
+
+onInput("s", function(){
+  fallDown(yellowCircle)
+})
+
+function moveDirection(table) {
+  if table.direction =
+}
+
+setInterval(function(){
+  for (let i = 0; i < fallingCircles.length; i++) {
+    moveDown(fallingCircles[i], 1)
+  }
+}, 1000 / 60)
