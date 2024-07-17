@@ -130,15 +130,14 @@ const level = map`
 p............................................................`
 setMap(level)
 
-function drawLineAlongY(x, y1, y2, pixel) {
-  let yLength = y2 - y1 + 1
-
-  for (i = 0; i < yLength; i++) {
-    addSprite(x, y1+i, pixel)
+function drawX(xTable, y, pixel, offset) {
+  if (offset == null){
+    offset = [0, 0]
   }
-}
-
-function drawLineAlongX(y, x1, x2, pixel) {
+  
+  let x1 = xTable[0] + offset[0]
+  let x2 = xTable[1] + offset[0]
+  y = y + offset[1]
   let xLength = x2 - x1 + 1
 
   for (i = 0; i < xLength; i++) {
@@ -146,7 +145,30 @@ function drawLineAlongX(y, x1, x2, pixel) {
   }
 }
 
-function getLineofTilesAlongX(y, x1, x2) {
+function drawY(x, yTable, pixel, offset) {
+  if (offset == null){
+    offset = [0, 0]
+  }
+  
+  let y1 = yTable[0] + offset[1]
+  let y2 = yTable[1] + offset[1]
+  x = x + offset[0]
+  let yLength = y2 - y1 + 1
+
+  for (i = 0; i < yLength; i++) {
+    addSprite(x, y1+i, pixel)
+  }
+}
+
+function addSprite2(x, y, pixel, offset){
+  if (offset == null){
+    offset = [0, 0]
+  }
+
+  addSprite(x + offset[0], y + offset[1], pixel)
+}
+
+function getTilesX(y, x1, x2) {
   let xLength = x2 - x1 + 1
   let lines = []
   for (i = 0; i < xLength; i++) {
@@ -155,7 +177,7 @@ function getLineofTilesAlongX(y, x1, x2) {
   return lines
 }
 
-function getLineofTilesAlongY(x, y1, y2) {
+function getTilesY(x, y1, y2) {
   let yLength = y2 - y1 + 1
   let lines = []
   for (i = 0; i < yLength; i++) {
@@ -163,46 +185,44 @@ function getLineofTilesAlongY(x, y1, y2) {
   }
   return lines
 }
+
+function getTile2(x, y, offset) {
+  if (offset == null){
+    offset = [0, 0]
+  }
+
+  return getTile(x + offset[0], y + offset[1])
+}
   
-function makeCircle(offsetX, offsetY, pixel) {
-  // addSprite(33+offsetX, 29+offsetY, pixel)
-  // addSprite(33+offsetX, 30+offsetY, pixel)
-  // addSprite(33+offsetX, 31+offsetY, pixel)
-  drawLineAlongY(33, 29, 31, pixel)
-  addSprite(32+offsetX, 32+offsetY, pixel)
-  addSprite(31+offsetX, 33+offsetY, pixel)
-  addSprite(30+offsetX, 33+offsetY, pixel)
-  addSprite(29+offsetX, 33+offsetY, pixel)
-  addSprite(28+offsetX, 32+offsetY, pixel)
-  addSprite(27+offsetX, 31+offsetY, pixel)
-  addSprite(27+offsetX, 30+offsetY, pixel)
-  addSprite(27+offsetX, 29+offsetY, pixel)
-  addSprite(28+offsetX, 28+offsetY, pixel)
-  addSprite(29+offsetX, 27+offsetY, pixel)
-  addSprite(30+offsetX, 27+offsetY, pixel)
-  addSprite(31+offsetX, 27+offsetY, pixel)
-  addSprite(32+offsetX, 28+offsetY, pixel)
+function makeCircle(pixel, offset) {
+  if (offset == null){
+    offset = [0, 0]
+  }
 
+  drawY(27, [29, 31], pixel, offset) // left line
+  addSprite2(28, 28, pixel, offset)
+  
+  drawY(33, [29, 31], pixel, offset) // right line
+  addSprite2(32, 32, pixel, offset)
+
+  drawX([29, 31], 27, pixel, offset) // top line
+  addSprite2(32, 28, pixel, offset)
+  
+  drawX([29, 31], 33, pixel, offset)// bottom line
+  addSprite2(28, 32, pixel, offset)
+
+  
   let table1 = [
-    getTile(32+offsetX, 32+offsetY)[0],
-    getTile(31+offsetX, 33+offsetY)[0],
-    getTile(30+offsetX, 33+offsetY)[0],
-    getTile(29+offsetX, 33+offsetY)[0],
-    getTile(28+offsetX, 32+offsetY)[0],
-    getTile(27+offsetX, 31+offsetY)[0],
-    getTile(27+offsetX, 30+offsetY)[0],
-    getTile(27+offsetX, 29+offsetY)[0],
-    getTile(28+offsetX, 28+offsetY)[0],
-    getTile(29+offsetX, 27+offsetY)[0],
-    getTile(30+offsetX, 27+offsetY)[0],
-    getTile(31+offsetX, 27+offsetY)[0],
-    getTile(32+offsetX, 28+offsetY)[0],
+    getTile2(28, 28, offset)[0],
+    getTile2(32, 32, offset)[0],
+    getTile2(32, 28, offset)[0],
+    getTile2(28, 32, offset)[0],
   ]
-
-  let table2 = getLineofTilesAlongY(33, 29, 31)
-  table1.concat(table2)
-
+  
+  let table2 = getLineOfTilesAlongY(33, 29, 31)
+  let finalTable = table1.concat(table2)
   return table1
+  
 
   /*
   return yCircle = [
@@ -225,7 +245,7 @@ function makeCircle(offsetX, offsetY, pixel) {
   ]*/
 }
 
-let blackCircle = makeCircle(0, 0, blackPixel)
+let blackCircle = makeCircle(blackPixel)
 // let yellowCircle = makeCircle(0, -27, yellowPixel)
 
 function moveRight(table, magnitude){
@@ -242,6 +262,7 @@ function moveLeft(table, magnitude){
     table[i].x -= magnitude
   }
 }
+
 
 onInput("d", function(){
   moveRight(blackCircle, 1)
