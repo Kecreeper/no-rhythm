@@ -199,6 +199,7 @@ function getTilesY(x, yTable, offset) {
   for (let i = 0; i < yLength; i++) {
     tiles.push(getTile(x, y1+i)[0])
   }
+  console.log(tiles)
   return tiles
 }
 
@@ -209,7 +210,9 @@ function getTile2(x, y, offset) {
 
   return getTile(x + offset[0], y + offset[1])
 }
-  
+
+let directions = ["up", "down", "left", "right"]
+
 function makeCircle(pixel, offset) {
   if (offset == null){
     offset = [0, 0]
@@ -243,14 +246,53 @@ function makeCircle(pixel, offset) {
   return finalTable
 }
 
-function makeInsideCircle(pixel, offset) {
-  drawY(28, [], pixel, offset)
+function makeInnerCircle(pixel, offset) {
+  if (offset == null){
+    offset = [0, 0]
+  }
+  
+  drawY(28, [29,31], pixel, offset)
+  drawY(29, [28,32], pixel, offset)
+  drawY(30, [28,32], pixel, offset)
+  drawY(31, [28,32], pixel, offset)
+  drawY(32, [29,31], pixel, offset)
+
+  let table1 = getTilesY(28, [29,31], offset)
+  let table2 = getTilesY(29, [28,32], offset)
+  let table3 = getTilesY(30, [28,32], offset)
+  let table4 = getTilesY(31, [28,32], offset)
+  let table5 = getTilesY(32, [29,31], offset)
+
+  let finalTable = table1.concat(table2, table3, table4, table5)
+  return finalTable
+}
+
+function randomDirectionCircle(string) {
+  if (string == "up") {
+    let circle = makeInnerCircle(yellowPixel, [0, -27])
+    circle.direction = "up"
+    return circle
+    
+  } else if (string == "down") {
+    let circle = makeInnerCircle(yellowPixel, [0, 27])
+    circle.direction = "down"
+    return circle
+    
+  } else if (string == "left") {
+    let circle = makeInnerCircle(yellowPixel, [-27, 0])
+    circle.direction = "left"
+    return circle
+    
+  } else if (string == "right") {
+    let circle = makeInnerCircle(yellowPixel, [27, 0])
+    circle.direction = "right"
+    return circle
+  }
 }
 
 
 
-
-
+/*
 function fallDown(table) {
   let count = 1
 
@@ -258,6 +300,7 @@ function fallDown(table) {
     moveDown(table, 1)
   }
 }
+*/
 
 function moveRight(table, magnitude){
   for (let i = 0; i < table.length; i++){
@@ -285,7 +328,7 @@ function moveDown(table, magnitude){
 
 let blackCircle = makeCircle(blackPixel)
 // let yellowCircle = makeCircle(yellowPixel, [0, -27])
-let directions = ["up", "down", "left", "right"]
+
 
 let fallingCircles = [
 ]
@@ -298,28 +341,36 @@ onInput("a", function(){
   moveLeft(blackCircle, 1)
 })
 
-onInput("s", function(){
-  fallDown(yellowCircle)
-})
-
-function moveDirection(table) {
-  if (table.direction == "down") {
-    moveDown(table)
-  }
+function moveDirection(table, magnitude) {
+  if (table.direction == "up") {
+    moveDown(table, magnitude)
+  } else if (table.direction == "down") {
+    moveUp(table, magnitude)
+  } else if (table.direction == "left") {
+    moveRight(table, magnitude)
+  } else if (table.direction == "right") {
+    moveLeft(table, magnitude)
+  } 
 }
 
-function createNew() {
-  while (true) {
-    setTimeout(function(){fallingCircles.push(makeCircle(yellowPixel, [0, -27]))}, 2000)
-    
-  }
-}
+var ticker = 0
 
 setInterval(function(){
+  console.log(ticker)
+  if (ticker == 50) {
+    let index = Math.floor(Math.random() * 4)
+    
+    fallingCircles.push(
+      randomDirectionCircle(
+        directions[index]
+      )
+    )
+    ticker = 0
+  } else {
+    ticker += 1
+  }
   
   for (let i = 0; i < fallingCircles.length; i++) {
-    moveDown(fallingCircles[i], 1)
+    moveDirection(fallingCircles[i], 1)
   }
 }, 1000 / 15)
-
-createNew()
