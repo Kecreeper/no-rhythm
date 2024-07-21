@@ -66,7 +66,10 @@ setLegend(
 0000000000000000`]
 )
 
-const level = map`
+
+let level = 0
+const levels = [
+  map`
 .............................................................
 .............................................................
 .............................................................
@@ -85,6 +88,34 @@ const level = map`
 .............................................................
 .............................................................
 .............................................................
+................................bb...........................
+.............................b.bbb...........................
+............................b..b.............................
+..................................b..........................
+...........................b...b.............................
+............................bbb..............................
+..............................b.......b......................
+..............................b..............................
+.............................b...............................
+.....................bbb.....bbb.......b.....................
+....................b..b....b...b............................
+...........................b.....b...........................
+....................b......b.....b......b....................
+........................b..b.....b.bb........................
+............................b...bb..b....b...................
+....................b...b....bbb....b........................
+.......................b.......b....b....b...................
+.....................bb.............b........................
+..............................bb.........b...................
+......................bb...........bb..b.....................
+........................bbb.b.bbb.b..........................
+.........................b...................................
+.............................b...............................
+.............................................................
+.................................b...........................
+................................b.b..........................
+..................................b..........................
+.................................bb..........................
 .............................................................
 .............................................................
 .............................................................
@@ -99,36 +130,10 @@ const level = map`
 .............................................................
 .............................................................
 .............................................................
-.............................................................
-.............................................................
-.............................................................
-.............................................................
-.............................................................
-.............................................................
-.............................................................
-.............................................................
-.............................................................
-.............................................................
-.............................................................
-.............................................................
-.............................................................
-.............................................................
-.............................................................
-.............................................................
-.............................................................
-.............................................................
-.............................................................
-.............................................................
-.............................................................
-.............................................................
-.............................................................
-.............................................................
-.............................................................
-.............................................................
-.............................................................
-.............................................................
-p............................................................`
-setMap(level)
+.............................................................`,
+]
+
+setMap(levels[level])
 
 function drawX(xTable, y, pixel, offset) {
   if (offset == null){
@@ -228,19 +233,33 @@ function getInnerCircle(offset) {
   return tiles
 }
 
-function deleteAndCount(table) {
+function countPixels(table) {
   var count = 0
   
   for (i=0;i<table.length;i++) {
     if (table[i] != null) {
       count += 1
-      let x = table[i].x
-      let y = table[i].y
-      clearTile(x, y)
     }
   }
   
   return count
+}
+
+function deletePixels(table, pixel, truefalse) {
+  for (i = 0; i < table.length ; i++) {
+    if (table[i].type === pixel) {
+      const spritesInTile = getTile(table[i].x, table[i].y)
+      console.log(spritesInTile)
+      for (j = 0; j < spritesInTile.length; j++) {
+        console.log("asdfasdfasdf")
+        if (spritesInTile[j].type === table[i]) {
+          console.log("chcecked")
+          spritesInTile[j].remove()
+        }
+      }
+    }
+  }
+  if (truefalse == true) {fallingCircles.splice(fallingCircles.indexOf(table), 1)}
 }
 
 function makeCircle(pixel, offset) {
@@ -297,32 +316,34 @@ function makeInnerCircle(pixel, offset) {
   return finalTable
 }
 
+let maxDistance = 34
+
 function randomDirectionCircle(string) {
   if (string == "up") {
     let circle = makeInnerCircle(yellowPixel, [0, -27])
     circle.direction = "up"
-    circle.distance = 30
+    circle.distance = maxDistance
     circle.traveled = 0
     return circle
     
   } else if (string == "down") {
     let circle = makeInnerCircle(yellowPixel, [0, 27])
     circle.direction = "down"
-    circle.distance = 30
+    circle.distance = maxDistance
     circle.traveled = 0
     return circle
     
   } else if (string == "left") {
     let circle = makeInnerCircle(yellowPixel, [-27, 0])
     circle.direction = "left"
-    circle.distance = 30
+    circle.distance = maxDistance
     circle.traveled = 0
     return circle
     
   } else if (string == "right") {
     let circle = makeInnerCircle(yellowPixel, [27, 0])
     circle.direction = "right"
-    circle.distance = 30
+    circle.distance = maxDistance
     circle.traveled = 0
     return circle
   }
@@ -342,6 +363,8 @@ function fallDown(table) {
 
 function moveRight(table, magnitude){
   if (table.traveled == table.distance) {
+    fallingCircles.splice(fallingCircles.indexOf(table), 1)
+    deletePixels(table)
     return
   }
   table.traveled += 1
@@ -352,6 +375,8 @@ function moveRight(table, magnitude){
 
 function moveLeft(table, magnitude){
   if (table.traveled == table.distance) {
+    fallingCircles.splice(fallingCircles.indexOf(table), 1)
+    deletePixels(table)
     return
   }
   table.traveled += 1
@@ -362,6 +387,8 @@ function moveLeft(table, magnitude){
 
 function moveUp(table, magnitude){
   if (table.traveled == table.distance) {
+    fallingCircles.splice(fallingCircles.indexOf(table), 1)
+    deletePixels(table)
     return
   }
   table.traveled += 1
@@ -372,6 +399,8 @@ function moveUp(table, magnitude){
 
 function moveDown(table, magnitude){
   if (table.traveled == table.distance) {
+    fallingCircles.splice(fallingCircles.indexOf(table), 1)
+    deletePixels(table)
     return
   }
   table.traveled += 1
@@ -380,20 +409,34 @@ function moveDown(table, magnitude){
   }
 }
 
-let blackCircle = makeCircle(blackPixel)
+// let blackCircle = makeCircle(blackPixel)
 // let yellowCircle = makeCircle(yellowPixel, [0, -27])
 
+let fallingCircles = []
 
-let fallingCircles = [
-]
+var score = 0
 
-onInput("d", function(){
-  console.log(getInnerCircle())
-  let count = deleteAndCount(fallingCircles[0])
+addText( score.toString(), { 
+  x: 3,
+  y: 1,
+  color: color`3`
 })
 
-onInput("a", function(){
-  moveLeft(blackCircle, 1)
+onInput("d", function(){
+  let inner = getInnerCircle()
+  let count = countPixels(inner)
+  score += count*100
+  
+  deletePixels(fallingCircles[0], yellowPixel)
+})
+
+afterInput(function() {
+  clearText()
+  addText( score.toString(), { 
+    x: 3,
+    y: 1,
+    color: color`3`
+  })
 })
 
 function moveDirection(table, magnitude) {
@@ -428,7 +471,7 @@ function spawn() {
       directions[index]
     )
   )
-  setTimeout(spawn, getRndInteger(1000, 2000))
+  setTimeout(spawn, getRndInteger(1500, 2500))
 }
 
 function gameLoop() {
