@@ -228,14 +228,19 @@ function getInnerCircle(offset) {
   return tiles
 }
 
-function deletePixels(table) {
+function deleteAndCount(table) {
+  var count = 0
+  
   for (i=0;i<table.length;i++) {
     if (table[i] != null) {
+      count += 1
       let x = table[i].x
       let y = table[i].y
       clearTile(x, y)
     }
   }
+  
+  return count
 }
 
 function makeCircle(pixel, offset) {
@@ -296,21 +301,29 @@ function randomDirectionCircle(string) {
   if (string == "up") {
     let circle = makeInnerCircle(yellowPixel, [0, -27])
     circle.direction = "up"
+    circle.distance = 30
+    circle.traveled = 0
     return circle
     
   } else if (string == "down") {
     let circle = makeInnerCircle(yellowPixel, [0, 27])
     circle.direction = "down"
+    circle.distance = 30
+    circle.traveled = 0
     return circle
     
   } else if (string == "left") {
     let circle = makeInnerCircle(yellowPixel, [-27, 0])
     circle.direction = "left"
+    circle.distance = 30
+    circle.traveled = 0
     return circle
     
   } else if (string == "right") {
     let circle = makeInnerCircle(yellowPixel, [27, 0])
     circle.direction = "right"
+    circle.distance = 30
+    circle.traveled = 0
     return circle
   }
 }
@@ -328,24 +341,40 @@ function fallDown(table) {
 */
 
 function moveRight(table, magnitude){
+  if (table.traveled == table.distance) {
+    return
+  }
+  table.traveled += 1
   for (let i = 0; i < table.length; i++){
     table[i].x += magnitude
   }
 }
 
 function moveLeft(table, magnitude){
+  if (table.traveled == table.distance) {
+    return
+  }
+  table.traveled += 1
   for (let i = 0; i < table.length; i++){
     table[i].x -= magnitude
   }
 }
 
 function moveUp(table, magnitude){
+  if (table.traveled == table.distance) {
+    return
+  }
+  table.traveled += 1
   for (let i = 0; i < table.length; i++){
     table[i].y -= magnitude
   }
 }
 
 function moveDown(table, magnitude){
+  if (table.traveled == table.distance) {
+    return
+  }
+  table.traveled += 1
   for (let i = 0; i < table.length; i++){
     table[i].y += magnitude
   }
@@ -359,9 +388,8 @@ let fallingCircles = [
 ]
 
 onInput("d", function(){
-  let table = getInnerCircle()
-  console.log(table)
-  deletePixels(table)
+  console.log(getInnerCircle())
+  let count = deleteAndCount(fallingCircles[0])
 })
 
 onInput("a", function(){
@@ -393,7 +421,7 @@ function moveLoop() {
 }
 
 function spawn() {
-  let index = Math.floor(Math.random() * 4)
+  let index = getRndInteger(0, 3)
   
   fallingCircles.push(
     randomDirectionCircle(
@@ -407,26 +435,6 @@ function gameLoop() {
   moveLoop()
   setTimeout(gameLoop, 1000 / 15)
 }
-
-/*
-setInterval(function(){
-  console.log(ticker)
-  if (ticker == 50) {
-    let index = Math.floor(Math.random() * 4)
-    
-    fallingCircles.push(
-      randomDirectionCircle(
-        directions[index]
-      )
-    )
-    ticker = 0
-  } else {
-    ticker += 1
-  }
-  
-  
-}, 1000 / 15)
-*/
 
 function startGame() {
   spawn()
