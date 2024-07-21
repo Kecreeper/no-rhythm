@@ -199,7 +199,6 @@ function getTilesY(x, yTable, offset) {
   for (let i = 0; i < yLength; i++) {
     tiles.push(getTile(x, y1+i)[0])
   }
-  console.log(tiles)
   return tiles
 }
 
@@ -212,6 +211,32 @@ function getTile2(x, y, offset) {
 }
 
 let directions = ["up", "down", "left", "right"]
+
+function getInnerCircle(offset) {
+  if (offset == null){
+    offset = [0, 0]
+  }
+  
+  let table1 = getTilesY(28, [29,31], offset)
+  let table2 = getTilesY(29, [28,32], offset)
+  let table3 = getTilesY(30, [28,32], offset)
+  let table4 = getTilesY(31, [28,32], offset)
+  let table5 = getTilesY(32, [29,31], offset)
+
+  let tiles = table1.concat(table2, table3, table4, table5)
+  
+  return tiles
+}
+
+function deletePixels(table) {
+  for (i=0;i<table.length;i++) {
+    if (table[i] != null) {
+      let x = table[i].x
+      let y = table[i].y
+      clearTile(x, y)
+    }
+  }
+}
 
 function makeCircle(pixel, offset) {
   if (offset == null){
@@ -334,7 +359,9 @@ let fallingCircles = [
 ]
 
 onInput("d", function(){
-  moveRight(blackCircle, 1)
+  let table = getInnerCircle()
+  console.log(table)
+  deletePixels(table)
 })
 
 onInput("a", function(){
@@ -353,8 +380,35 @@ function moveDirection(table, magnitude) {
   } 
 }
 
+function getRndInteger(min, max) {
+  return Math.floor(Math.random() * (max - min + 1) ) + min;
+}
+
 var ticker = 0
 
+function moveLoop() {
+  for (let i = 0; i < fallingCircles.length; i++) {
+    moveDirection(fallingCircles[i], 1)
+  }
+}
+
+function spawn() {
+  let index = Math.floor(Math.random() * 4)
+  
+  fallingCircles.push(
+    randomDirectionCircle(
+      directions[index]
+    )
+  )
+  setTimeout(spawn, getRndInteger(1000, 2000))
+}
+
+function gameLoop() {
+  moveLoop()
+  setTimeout(gameLoop, 1000 / 15)
+}
+
+/*
 setInterval(function(){
   console.log(ticker)
   if (ticker == 50) {
@@ -370,7 +424,13 @@ setInterval(function(){
     ticker += 1
   }
   
-  for (let i = 0; i < fallingCircles.length; i++) {
-    moveDirection(fallingCircles[i], 1)
-  }
+  
 }, 1000 / 15)
+*/
+
+function startGame() {
+  spawn()
+  gameLoop()
+}
+
+startGame()
