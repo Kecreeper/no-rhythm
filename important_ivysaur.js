@@ -12,6 +12,8 @@ const player = "p"
 const blackPixel = "b"
 const yellowPixel = "y"
 const redPixel = "r"
+const metalBlock = "g"
+const woodBlock = "w"
 
 setLegend(
   [player, bitmap`
@@ -81,12 +83,59 @@ setLegend(
 3333333333333333
 3333333333333333
 3333333333333333
-3333333333333333`]
+3333333333333333`],
+  [metalBlock, bitmap`
+LLLLLLLLLLLLLLL1
+L222222222222221
+L211111112111101
+L211111121111201
+L211111211112101
+L211112111121101
+L211121111211101
+L211211112111101
+L212111121111101
+L221111211111101
+L211112111111101
+L211121111111201
+L211211111112101
+L212111111121101
+L200000000000001
+1111111111111111`],
+  [woodBlock, bitmap`
+222222222222222C
+2C999999999999CC
+29C0000000000C9C
+290CCCCCCCCCC29C
+290C99999999929C
+290C99999999929C
+290C99999999929C
+290C99999999929C
+290C99999999929C
+290C99999999929C
+290C99999999929C
+290C99999999929C
+290C99999999929C
+29C2222222222C9C
+2C999999999999CC
+CCCCCCCCCCCCCCCC`],
 )
 
 
 let level = 0
 const levels = [
+  map`
+gggggggggggg
+gggggggggggg
+gggggggggggg
+gbbbbbbbbbbg
+gbbbbbbbbbbg
+gggggggggggg
+gggggggggggg
+gggggggggggg
+gggggggggggg
+gggggggggggg
+gggggggggggg
+gggggggggggg`,
   map`
 .............................................................
 .............................................................
@@ -753,8 +802,6 @@ function getPoints(offset) {
   let table5 = getTilesY(32, [29,31], offset)
 
   let tiles = table1.concat(table2, table3, table4, table5)
-  console.log(tiles)
-  console.log(tiles.length)
   let finalTiles = []
 
   for (let i = 0; i < tiles.length; i++) {
@@ -897,6 +944,7 @@ function moveRight(table, magnitude){
   if (table.traveled == table.distance) {
     fallingCircles.splice(fallingCircles.indexOf(table), 1)
     deletePixels(table, yellowPixel)
+    damage += 21
     return
   }
   table.traveled += 1
@@ -909,6 +957,7 @@ function moveLeft(table, magnitude){
   if (table.traveled == table.distance) {
     fallingCircles.splice(fallingCircles.indexOf(table), 1)
     deletePixels(table, yellowPixel)
+    damage += 21
     return
   }
   table.traveled += 1
@@ -921,6 +970,7 @@ function moveUp(table, magnitude){
   if (table.traveled == table.distance) {
     fallingCircles.splice(fallingCircles.indexOf(table), 1)
     deletePixels(table, yellowPixel)
+    damage += 21
     return
   }
   table.traveled += 1
@@ -933,6 +983,7 @@ function moveDown(table, magnitude){
   if (table.traveled == table.distance) {
     fallingCircles.splice(fallingCircles.indexOf(table), 1)
     deletePixels(table, yellowPixel)
+    damage += 21
     return
   }
   table.traveled += 1
@@ -945,6 +996,10 @@ function moveDown(table, magnitude){
 // let yellowCircle = makeCircle(yellowPixel, [0, -27])
 
 let fallingCircles = []
+
+function updateMap() {
+  setMap(levels[level])
+}
 
 
 function circleHandler(table, magnitude) {
@@ -964,26 +1019,63 @@ function getRndInteger(min, max) {
 }
 
 var score = 0
-
+var gameState = "Menu" // "Menu" "Game" "End"
 var damage = 0
-
-addText( score.toString(), { 
-  x: 3,
-  y: 1,
-  color: color`3`
-})
 
 let innerCircleAmount = 21
 
 function back1Level() {
-  if (damage <= 18) {
+  if (damage <= 21) {
     damage = 0
   } else {
-    damage -= 18
+    damage -= 21
   }
 }
 
+function moveLoop() {
+  for (let i = 0; i < fallingCircles.length; i++) {
+    circleHandler(fallingCircles[i], 1)
+  }
+}
+
+function spawnLoop() {
+  let index = getRndInteger(0, 3)
+  
+  fallingCircles.push(
+    randomDirectionCircle(
+      directions[index]
+    )
+  )
+  setTimeout(spawnLoop, getRndInteger(750, 1250))
+}
+
+function gameLoop() {
+  moveLoop()
+  setTimeout(gameLoop, 1000 / 30)
+}
+
+function startGame() {
+  clearText()
+  level = 2
+  updateMap()
+  
+  addText( score.toString(), { 
+    x: 3,
+    y: 1,
+    color: color`3`
+  })
+
+  spawnLoop()
+  gameLoop()
+}
+
 onInput("d", function(){
+  if (gameState == "Menu") {
+    gameState = "Game"
+    startGame()
+    return
+  }
+  
   let points = getPoints()
   let count = countPixels(points)
   score += count*100
@@ -1000,18 +1092,26 @@ onInput("d", function(){
 afterInput(function() {
   clearText()
 
-  if (damage >= 18 && damage < 36) {
+  console.log(damage)
+
+  if (damage < 21) {
     level = 1
-  } else if (damage >= 36 && damage < 54) {
+  } else if (damage >= 21 && damage < 42) {
     level = 2
-  } else if (damage >= 54 && damage < 72) {
+  } else if (damage >= 42 && damage < 63) {
     level = 3
-  } else if (damage >= 72 && damage < 90) {
+  } else if (damage >= 63 && damage < 84) {
     level = 4
-  } else if (damage >= 90 && damage < 108) {
+  } else if (damage >= 84 && damage < 105) {
     level = 5
-  } else if (damage >= 108 && damage < 126) {
+  } else if (damage >= 105 && damage < 126) {
     level = 6
+  } else if (damage >= 126 && damage < 147) {
+    level = 7
+  } else if (damage >= 147 && damage < 168) {
+    level = 8
+  } else if (damage >= 168 && damage < 189) {
+    level = 9
   }
 
   setMap(levels[level])
@@ -1023,31 +1123,18 @@ afterInput(function() {
   })
 })
 
-function moveLoop() {
-  for (let i = 0; i < fallingCircles.length; i++) {
-    circleHandler(fallingCircles[i], 1)
-  }
+function mainMenu() {
+  addText("Zero Rhythm" , {
+    x: 5,
+    y: 5,
+    color: color`4`
+  })
+  addText("Press D to play" , {
+    x: 3,
+    y: 12,
+    color: color`H`
+  })
 }
 
-function spawnLoop() {
-  let index = getRndInteger(0, 3)
-  
-  fallingCircles.push(
-    randomDirectionCircle(
-      directions[index]
-    )
-  )
-  setTimeout(spawnLoop, getRndInteger(1500, 2500))
-}
 
-function gameLoop() {
-  moveLoop()
-  setTimeout(gameLoop, 1000 / 30)
-}
-
-function startGame() {
-  spawnLoop()
-  gameLoop()
-}
-
-startGame()
+mainMenu()
