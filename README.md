@@ -1,2 +1,2 @@
 # no-rhythm
-sprig game
+very bad and poorly coded "rhythm" "game" with no music
